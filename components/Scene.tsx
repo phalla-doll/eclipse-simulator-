@@ -8,7 +8,7 @@ import { ShadowCone } from './ShadowCone'
 import { useSimulationStore } from '../store/simulationStore'
 import { getMoonPosition } from '../lib/math'
 import { checkLunarEclipse, checkSolarEclipse } from '../lib/eclipseDetection'
-import { Vector3 } from 'three'
+import { Vector3, MathUtils } from 'three'
 import { useEffect, useMemo, useRef } from 'react'
 
 const SUN_RADIUS = 5
@@ -65,14 +65,21 @@ function Simulation() {
         desiredPos.copy(sunPos).add(new Vector3(0, 5, 0))
       }
       
-      // Always smoothly track the target
-      controlsRef.current.target.lerp(target, 0.05)
+      // Framerate-independent lerp factor
+      const dt = MathUtils.clamp(delta, 0, 0.1)
       
       if (isTransitioning.current) {
-        state.camera.position.lerp(desiredPos, 0.05)
-        if (state.camera.position.distanceTo(desiredPos) < 0.5) {
+        const lerpFactor = 1 - Math.exp(-5 * dt)
+        controlsRef.current.target.lerp(target, lerpFactor)
+        state.camera.position.lerp(desiredPos, lerpFactor)
+        
+        if (state.camera.position.distanceTo(desiredPos) < 0.1 && controlsRef.current.target.distanceTo(target) < 0.1) {
           isTransitioning.current = false
         }
+      } else {
+        // Just track the target smoothly when not transitioning
+        const trackFactor = 1 - Math.exp(-10 * dt)
+        controlsRef.current.target.lerp(target, trackFactor)
       }
       
       controlsRef.current.update()
@@ -145,7 +152,7 @@ function Simulation() {
       <OrbitControls 
         ref={controlsRef} 
         enableZoom={true} 
-        enablePan={true} 
+        enablePan={false} 
         onStart={() => { isTransitioning.current = false }}
       />
     </>
