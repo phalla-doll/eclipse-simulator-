@@ -9,6 +9,7 @@ export function UIPanel() {
     showOrbits, setShowOrbits, 
     showShadowCones, setShowShadowCones, 
     cameraPreset, setCameraPreset, 
+    cameraResetTrigger, triggerCameraReset,
     time, setTime, 
     solarEclipseStatus, lunarEclipseStatus 
   } = useSimulationStore()
@@ -116,6 +117,12 @@ export function UIPanel() {
             </button>
           ))}
         </div>
+        <button 
+          onClick={triggerCameraReset}
+          className="mt-2 py-2 text-xs font-medium uppercase tracking-wider border border-white/10 text-white/50 hover:border-white/30 hover:text-white transition-colors"
+        >
+          Reset Camera
+        </button>
       </div>
     </div>
   )

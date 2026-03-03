@@ -19,7 +19,7 @@ const EARTH_DISTANCE = 50
 const MOON_DISTANCE = 5
 
 function Simulation() {
-  const { time, setTime, isPlaying, timeScale, setEclipseStatus, showOrbits, showShadowCones, cameraPreset } = useSimulationStore()
+  const { time, setTime, isPlaying, timeScale, setEclipseStatus, showOrbits, showShadowCones, cameraPreset, cameraResetTrigger } = useSimulationStore()
   
   // Leva controls for dev mode
   const isDev = process.env.NODE_ENV === 'development'
@@ -42,13 +42,15 @@ function Simulation() {
   const controlsRef = useRef<any>(null)
   const isTransitioning = useRef(false)
   const lastPreset = useRef(cameraPreset)
+  const lastResetTrigger = useRef(cameraResetTrigger)
 
   useEffect(() => {
-    if (lastPreset.current !== cameraPreset) {
+    if (lastPreset.current !== cameraPreset || lastResetTrigger.current !== cameraResetTrigger) {
       isTransitioning.current = true
       lastPreset.current = cameraPreset
+      lastResetTrigger.current = cameraResetTrigger
     }
-  }, [cameraPreset])
+  }, [cameraPreset, cameraResetTrigger])
 
   useFrame((state, delta) => {
     if (isPlaying) {

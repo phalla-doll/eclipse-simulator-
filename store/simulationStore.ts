@@ -15,6 +15,8 @@ interface SimulationState {
   setShowLabels: (show: boolean) => void
   cameraPreset: 'space' | 'earth' | 'sun'
   setCameraPreset: (preset: 'space' | 'earth' | 'sun') => void
+  cameraResetTrigger: number
+  triggerCameraReset: () => void
   time: number // 0 to 360
   setTime: (time: number) => void
   solarEclipseStatus: string
@@ -37,6 +39,8 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   setShowLabels: (show) => set({ showLabels: show }),
   cameraPreset: 'space',
   setCameraPreset: (preset) => set({ cameraPreset: preset }),
+  cameraResetTrigger: 0,
+  triggerCameraReset: () => set((state) => ({ cameraResetTrigger: state.cameraResetTrigger + 1 })),
   time: 180,
   setTime: (time) => set({ time }),
   solarEclipseStatus: 'No Eclipse',
