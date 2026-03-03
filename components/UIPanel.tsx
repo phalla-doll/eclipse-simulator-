@@ -11,6 +11,7 @@ export function UIPanel() {
     cameraPreset, setCameraPreset, 
     cameraResetTrigger, triggerCameraReset,
     time, setTime, 
+    inclination, setInclination,
     solarEclipseStatus, lunarEclipseStatus 
   } = useSimulationStore()
 
@@ -84,6 +85,19 @@ export function UIPanel() {
           min="0.1" max="50" step="0.1" 
           value={timeScale} 
           onChange={(e) => setTimeScale(parseFloat(e.target.value))}
+          className="w-full accent-white"
+        />
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-white/50 uppercase tracking-wider">Inclination ({inclination}°)</span>
+        </div>
+        <input 
+          type="range" 
+          min="0" max="10" step="0.1" 
+          value={inclination} 
+          onChange={(e) => setInclination(parseFloat(e.target.value))}
           className="w-full accent-white"
         />
       </div>

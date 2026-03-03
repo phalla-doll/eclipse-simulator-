@@ -10,7 +10,6 @@ import { getMoonPosition } from '../lib/math'
 import { checkLunarEclipse, checkSolarEclipse } from '../lib/eclipseDetection'
 import { Vector3 } from 'three'
 import { useEffect, useMemo, useRef } from 'react'
-import { useControls } from 'leva'
 
 const SUN_RADIUS = 5
 const EARTH_RADIUS = 1
@@ -19,13 +18,7 @@ const EARTH_DISTANCE = 50
 const MOON_DISTANCE = 5
 
 function Simulation() {
-  const { time, setTime, isPlaying, timeScale, setEclipseStatus, showOrbits, showShadowCones, cameraPreset, cameraResetTrigger } = useSimulationStore()
-  
-  // Leva controls for dev mode
-  const isDev = process.env.NODE_ENV === 'development'
-  const { inclination } = useControls({
-    inclination: { value: 5, min: 0, max: 10, step: 0.1, render: () => isDev }
-  })
+  const { time, setTime, isPlaying, timeScale, setEclipseStatus, showOrbits, showShadowCones, cameraPreset, cameraResetTrigger, inclination } = useSimulationStore()
 
   const sunPos = useMemo(() => new Vector3(0, 0, 0), [])
   const earthPos = useMemo(() => new Vector3(EARTH_DISTANCE, 0, 0), [])

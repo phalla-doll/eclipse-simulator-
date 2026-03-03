@@ -19,6 +19,8 @@ interface SimulationState {
   triggerCameraReset: () => void
   time: number // 0 to 360
   setTime: (time: number) => void
+  inclination: number
+  setInclination: (inclination: number) => void
   solarEclipseStatus: string
   lunarEclipseStatus: string
   setEclipseStatus: (solar: string, lunar: string) => void
@@ -43,6 +45,8 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   triggerCameraReset: () => set((state) => ({ cameraResetTrigger: state.cameraResetTrigger + 1 })),
   time: 180,
   setTime: (time) => set({ time }),
+  inclination: 5,
+  setInclination: (inclination) => set({ inclination }),
   solarEclipseStatus: 'No Eclipse',
   lunarEclipseStatus: 'No Eclipse',
   setEclipseStatus: (solar, lunar) => set({ solarEclipseStatus: solar, lunarEclipseStatus: lunar })
