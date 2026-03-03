@@ -9,7 +9,7 @@ import { useSimulationStore } from '../store/simulationStore'
 import { getMoonPosition } from '../lib/math'
 import { checkLunarEclipse, checkSolarEclipse } from '../lib/eclipseDetection'
 import { Vector3 } from 'three'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useControls } from 'leva'
 
 const SUN_RADIUS = 5
@@ -39,27 +39,49 @@ function Simulation() {
     setEclipseStatus(solarStatus, lunarStatus)
   }, [time, inclination, earthPos, moonPos, sunPos, setEclipseStatus])
 
+  const controlsRef = useRef<any>(null)
+  const isTransitioning = useRef(false)
+  const lastPreset = useRef(cameraPreset)
+
+  useEffect(() => {
+    if (lastPreset.current !== cameraPreset) {
+      isTransitioning.current = true
+      lastPreset.current = cameraPreset
+    }
+  }, [cameraPreset])
+
   useFrame((state, delta) => {
     if (isPlaying) {
       setTime((time + delta * 10 * timeScale) % 360)
     }
     
-    // Camera logic
-    const camera = state.camera
-    const target = new Vector3()
-    
-    if (cameraPreset === 'space') {
-      target.copy(earthPos)
-      camera.position.lerp(new Vector3(EARTH_DISTANCE + 20, 15, 20), 0.05)
-    } else if (cameraPreset === 'earth') {
-      target.copy(moonPos)
-      camera.position.lerp(new Vector3(EARTH_DISTANCE - 2, 0, 0), 0.05)
-    } else if (cameraPreset === 'sun') {
-      target.copy(earthPos)
-      camera.position.lerp(new Vector3(SUN_RADIUS + 2, 0, 0), 0.05)
+    if (controlsRef.current) {
+      const target = new Vector3()
+      const desiredPos = new Vector3()
+      
+      if (cameraPreset === 'space') {
+        target.copy(earthPos)
+        desiredPos.copy(earthPos).add(new Vector3(20, 15, 20))
+      } else if (cameraPreset === 'earth') {
+        target.copy(moonPos)
+        desiredPos.copy(earthPos).add(new Vector3(0, 0, 2))
+      } else if (cameraPreset === 'sun') {
+        target.copy(earthPos)
+        desiredPos.copy(sunPos).add(new Vector3(0, 5, 0))
+      }
+      
+      // Always smoothly track the target
+      controlsRef.current.target.lerp(target, 0.05)
+      
+      if (isTransitioning.current) {
+        state.camera.position.lerp(desiredPos, 0.05)
+        if (state.camera.position.distanceTo(desiredPos) < 0.5) {
+          isTransitioning.current = false
+        }
+      }
+      
+      controlsRef.current.update()
     }
-    
-    camera.lookAt(target)
   })
 
   const earthDir = new Vector3().subVectors(earthPos, sunPos).normalize()
@@ -124,6 +146,13 @@ function Simulation() {
           />
         </>
       )}
+
+      <OrbitControls 
+        ref={controlsRef} 
+        enableZoom={true} 
+        enablePan={true} 
+        onStart={() => { isTransitioning.current = false }}
+      />
     </>
   )
 }
@@ -134,7 +163,6 @@ export default function Scene() {
       <color attach="background" args={['#000000']} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
       <Simulation />
-      <OrbitControls enableZoom={true} enablePan={false} />
     </Canvas>
   )
 }
